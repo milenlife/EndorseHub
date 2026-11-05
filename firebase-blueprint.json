@@ -1,0 +1,100 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role definition",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 512 },
+        "role": { "type": "string", "enum": ["owner", "admin", "talent"], "maxLength": 32 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Endorsement": {
+      "title": "Endorsement",
+      "description": "Endorsement campaign record with 10 stage tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "brandName": { "type": "string", "maxLength": 128 },
+        "campaignTitle": { "type": "string", "maxLength": 256 },
+        "talentId": { "type": "string", "maxLength": 128 },
+        "talentName": { "type": "string", "maxLength": 128 },
+        "talentEmail": { "type": "string", "maxLength": 256 },
+        "platform": { "type": "string", "enum": ["Instagram", "TikTok", "YouTube", "Twitter/X"], "maxLength": 64 },
+        "fee": { "type": "number" },
+        "stage": { "type": "string", "maxLength": 64 },
+        "stageIndex": { "type": "number" },
+        "deadline": { "type": "string", "maxLength": 64 },
+        "whatsAppGroupLink": { "type": "string", "maxLength": 512 },
+        "scriptContent": { "type": "string", "maxLength": 4096 },
+        "draftUrl": { "type": "string", "maxLength": 1024 },
+        "postedUrl": { "type": "string", "maxLength": 1024 },
+        "insights": { "type": "object" },
+        "paymentStatus": { "type": "string", "enum": ["unpaid", "pending", "paid"], "maxLength": 64 },
+        "notes": { "type": "string", "maxLength": 2048 },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "brandName", "campaignTitle", "talentName", "fee", "stage"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Automatic stage change notifications and alerts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "recipientEmail": { "type": "string", "maxLength": 256 },
+        "recipientRole": { "type": "string", "maxLength": 32 },
+        "endorsementId": { "type": "string", "maxLength": 128 },
+        "brandName": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 256 },
+        "message": { "type": "string", "maxLength": 1024 },
+        "fromStage": { "type": "string", "maxLength": 64 },
+        "toStage": { "type": "string", "maxLength": 64 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "title", "message", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Log of actions and stage updates",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "endorsementId": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 128 },
+        "actorEmail": { "type": "string", "maxLength": 256 },
+        "actorRole": { "type": "string", "maxLength": 32 },
+        "description": { "type": "string", "maxLength": 1024 },
+        "timestamp": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "action", "description", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Registered users with system roles"
+    },
+    "/endorsements/{endorsementId}": {
+      "schema": "Endorsement",
+      "description": "Endorsement campaign records"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "System status change notifications"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Immutable history of status transitions"
+    }
+  }
+}

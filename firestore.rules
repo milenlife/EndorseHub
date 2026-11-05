@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnerEmail() {
+      return isSignedIn() && request.auth.token.email == 'mami.elen14@gmail.com';
+    }
+
+    function isUserDoc(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        isOwnerEmail() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'admin']))
+      );
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (isUserDoc(userId) || isOwnerEmail());
+      allow update: if isSignedIn() && (isUserDoc(userId) || isAdmin());
+      allow delete: if isOwnerEmail();
+    }
+
+    // Endorsements collection
+    match /endorsements/{endorsementId} {
+      // Non-admins can view dashboard and endorsement list
+      allow read: if isSignedIn();
+      // Only Admin or Owner can create, edit, or delete
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isOwnerEmail() || isAdmin();
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // Audit logs collection
+    match /audit_logs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false; // Immutable audit logs
+    }
+  }
+}
